@@ -25,7 +25,8 @@ class DetailActivity : AppCompatActivity() {
 
         requestQueue = Volley.newRequestQueue(this)
 
-        binding.detailWb.loadUrl(pro)
+//        this is normal
+//        binding.detailWb.loadUrl(pro)
         parseJSON()
     }
 
@@ -40,7 +41,10 @@ class DetailActivity : AppCompatActivity() {
                     for (i in 0 until jsonArray.length()) {
                         val item = jsonArray.getJSONObject(i)
                         val title = item.getString("title")
+                        val urlC = item.getString("url")
 
+//                     from data
+                        binding.detailWb.loadUrl(urlC)
                         supportActionBar?.title = title
                         Log.e("TAG", "parseJSON: $title")
                     }
