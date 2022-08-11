@@ -7,6 +7,6 @@ import retrofit2.http.Path
 interface ApiCall {
 
 //        @GET()
-//        fun listImage(@Path("user") img: String?): Call<List<Repo?>?>?
+//        fun listImage
 
 }
