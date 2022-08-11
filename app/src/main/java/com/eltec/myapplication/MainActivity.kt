@@ -1,13 +1,24 @@
 package com.eltec.myapplication
 
-import androidx.appcompat.app.AppCompatActivity
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.eltec.myapplication.databinding.ActivityMainBinding
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.eltec.myapplication.model.Item
+import com.eltec.myapplication.model.ItemAdapter
+import org.json.JSONException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var requestQueue: RequestQueue
+    private lateinit var listItem: MutableList<Item>
+    private lateinit var adapterItem: ItemAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,20 +26,49 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        requestQueue = Volley.newRequestQueue(this)
 
-//example
-        var url: MutableList<String> = mutableListOf()
-        url.add("https://images.unsplash.com/photo-1656414562758-8ee23647872e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80")
-        url.add("https://images.unsplash.com/photo-1656464411931-be8ee35d8c6a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80")
-        url.add("https://images.unsplash.com/photo-1656376406183-506c85f2cdf2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80")
+        initRv()
+        parseJSON()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun parseJSON() {
+        val url = "https://tiradodev.github.io/appLite/pruebaAzteca.json?format=json/"
+
+        val request = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                try {
+                    val jsonArray = response.getJSONArray("items")
+                    for (i in 0 until jsonArray.length()) {
+                        val item = jsonArray.getJSONObject(i)
+                        val pro = item.getString("programa")
+                        val img = item.getString("imagen")
+                        val priv = item.getString("private")
+
+                        listItem.add(Item(pro, img, priv))
+                        Log.e("TAG", "parseJSON: $listItem" )
+                    }
+
+                    adapterItem.notifyDataSetChanged()
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }) { error -> error.printStackTrace() }
+        requestQueue.add(request)
+
+    }
+
+    private fun initRv() {
+        listItem = mutableListOf()
+
+        adapterItem = ItemAdapter(this,listItem)
+        val llManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.mainVp.layoutManager = llManager
 
 
-        Retrofit.Builder()
-            .baseUrl("https://tiradodev.github.io/appLite/pruebaAzteca.json")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        binding.mainVp.adapter = PagerAdapter(this, url)
-
+        binding.mainVp.adapter = adapterItem
     }
 }

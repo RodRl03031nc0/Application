@@ -1,6 +1,6 @@
 package com.eltec.myapplication.model
 
-data class ItemsP(
+data class Item(
     val programa: String,
     val imagen: String,
     val private: String)
